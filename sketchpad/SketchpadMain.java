@@ -12,6 +12,7 @@ public class SketchpadMain extends Frame {
 
     private SketchpadCanvas canvas;  // 自定义绘图区
     private Color selectedColor = Color.BLACK;
+    private Label statusLabel; // 状态提示栏
 
     public SketchpadMain() {
         super("Sketchpad Main Page");
@@ -21,6 +22,11 @@ public class SketchpadMain extends Frame {
         // 创建绘图区
         canvas = new SketchpadCanvas();
         add(canvas, BorderLayout.CENTER);
+
+        // 创建状态提示栏
+        statusLabel = new Label("Current Mode: LINE");        
+        canvas.setStatusCallback(statusLabel::setText);
+        add(statusLabel, BorderLayout.SOUTH); // 添加到底部
 
         // 创建按钮面板
         Panel buttonPanel = new Panel();
@@ -40,46 +46,92 @@ public class SketchpadMain extends Frame {
         Button copyBtn = new Button("Copy");
         Button pasteBtn = new Button("Paste");
 
-        // 添加按钮点击事件
-        lineBtn.addActionListener(e -> canvas.setMode(DrawMode.LINE));
-        rectBtn.addActionListener(e -> canvas.setMode(DrawMode.RECTANGLE));
-        sqrBtn.addActionListener(e -> canvas.setMode(DrawMode.SQUARE));
-        ellipseBtn.addActionListener(e -> canvas.setMode(DrawMode.ELLIPSE));
-        cleBtn.addActionListener(e -> canvas.setMode(DrawMode.CIRCLE));
-        plyBtn.addActionListener(e -> canvas.setMode(DrawMode.POLYGON_CLOSED));
-        freehandBtn.addActionListener(e -> canvas.setMode(DrawMode.FREEHAND));
-        clearBtn.addActionListener(e -> canvas.clearShapes());
+        // 添加按钮点击事件 + 状态栏更新
+        lineBtn.addActionListener(e -> {
+            canvas.setMode(DrawMode.LINE);
+            statusLabel.setText("Current Mode: LINE");
+        });
+        rectBtn.addActionListener(e -> {
+            canvas.setMode(DrawMode.RECTANGLE);
+            statusLabel.setText("Current Mode: RECTANGLE");
+        });
+        sqrBtn.addActionListener(e -> {
+            canvas.setMode(DrawMode.SQUARE);
+            statusLabel.setText("Current Mode: SQUARE");
+        });
+        ellipseBtn.addActionListener(e -> {
+            canvas.setMode(DrawMode.ELLIPSE);
+            statusLabel.setText("Current Mode: ELLIPSE");
+        });
+        cleBtn.addActionListener(e -> {
+            canvas.setMode(DrawMode.CIRCLE);
+            statusLabel.setText("Current Mode: CIRCLE");
+        });
+        plyBtn.addActionListener(e -> {
+            canvas.setMode(DrawMode.POLYGON_CLOSED);
+            statusLabel.setText("Current Mode: POLYGON");
+        });
+        freehandBtn.addActionListener(e -> {
+            canvas.setMode(DrawMode.FREEHAND);
+            statusLabel.setText("Current Mode: FREEHAND");
+        });
+
+        clearBtn.addActionListener(e -> {
+            canvas.clearShapes();
+            canvas.clearClipboard();
+            statusLabel.setText("Canvas cleared");
+        });
+
         colorBtn.addActionListener(e -> {
             Color chosenColor = ColorDialog.showColorDialog(this, selectedColor);
-            if(chosenColor != null) {
+            if (chosenColor != null) {
                 selectedColor = chosenColor;
                 canvas.setCurrentColor(selectedColor);
+                statusLabel.setText("Selected Color Updated");
             }
         });
 
-        cutBtn.addActionListener(e -> canvas.cutSelectedShape());
-        // Add keyboard shortcut ctrl+x for cut
-        canvas.addKeyListener(new KeyAdapter() {
-            public void keyPressed(KeyEvent e) {
-                if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_X) {
-                    canvas.cutSelectedShape();
-                }
+        cutBtn.addActionListener(e -> {
+            canvas.cutSelectedShape();
+            statusLabel.setText("Cut selected shape");
+        });
+
+        copyBtn.addActionListener(e -> {
+            canvas.copySelectedShape();
+            statusLabel.setText("Copied selected shape");
+        });
+
+        pasteBtn.addActionListener(e -> {
+            if (canvas.getClipboardShape() != null) {
+                canvas.pasteShape();
+                statusLabel.setText("Pasted shape");
+            } else {
+                statusLabel.setText("Clipboard is empty or nothing copied yet");
             }
         });
-        canvas.setFocusable(true);
-        canvas.requestFocusInWindow();
 
-        copyBtn.addActionListener(e -> canvas.copySelectedShape());
-        pasteBtn.addActionListener(e -> canvas.pasteShape());
-        // Add keyboard shortcuts ctrl+c / ctrl+v
+        // 设置快捷键：Ctrl+X / C / V
         canvas.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e) {
                 if (e.isControlDown()) {
-                    if (e.getKeyCode() == KeyEvent.VK_C) canvas.copySelectedShape();
-                    if (e.getKeyCode() == KeyEvent.VK_V) canvas.pasteShape();
+                    switch (e.getKeyCode()) {
+                        case KeyEvent.VK_X:
+                            canvas.cutSelectedShape();
+                            statusLabel.setText("Cut selected shape (Ctrl+X)");
+                            break;
+                        case KeyEvent.VK_C:
+                            canvas.copySelectedShape();
+                            statusLabel.setText("Copied selected shape (Ctrl+C)");
+                            break;
+                        case KeyEvent.VK_V:
+                            canvas.pasteShape();
+                            statusLabel.setText("Pasted shape (Ctrl+V)");
+                            break;
+                    }
                 }
             }
         });
+
         canvas.setFocusable(true);
         canvas.requestFocusInWindow();
 

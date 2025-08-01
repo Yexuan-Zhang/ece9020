@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 // 画布面板，绘图主逻辑
 public class SketchpadCanvas extends Canvas {
@@ -19,6 +20,11 @@ public class SketchpadCanvas extends Canvas {
     private int lastMouseX, lastMouseY;
     private boolean isDragging = false;
     private Shape clipboardShape = null;
+
+    private Consumer<String> statusCallback;
+    public void setStatusCallback(Consumer<String> callback) {
+        this.statusCallback = callback;
+    }
 
     public void setCurrentColor(Color color) {
         this.currentColor = color;
@@ -39,6 +45,9 @@ public class SketchpadCanvas extends Canvas {
                     Shape s = shapes.get(i);
                     if (s.containsPoint(lastMouseX, lastMouseY)) {
                         selectedShape = s;
+                            // if (statusCallback != null) {
+                            //     statusCallback.accept("Shape selected");
+                            // }
                         return;
                     }
                 }
@@ -68,7 +77,12 @@ public class SketchpadCanvas extends Canvas {
                     return;
                 }
 
-                if(!isDrawing) return;
+                if(!isDrawing) {
+                    if (statusCallback != null) {
+                        statusCallback.accept("Shape is selected");
+                    }
+                    return;
+                }
                 
                 // Prevent zero-size shapes
                 if (startX == endX && startY == endY) {
@@ -136,8 +150,6 @@ public class SketchpadCanvas extends Canvas {
                 }
             }
         });
-
-        
     }
 
     public void setMode(DrawMode mode) {
@@ -207,7 +219,6 @@ public class SketchpadCanvas extends Canvas {
             shapes.remove(selectedShape);
             selectedShape = null;
             repaint();
-
         }
     }
 
@@ -216,6 +227,14 @@ public class SketchpadCanvas extends Canvas {
         if (selectedShape != null) {
             clipboardShape = cloneShape(selectedShape);
         }
+    }
+
+    public Shape getClipboardShape() {
+        return clipboardShape;
+    }
+    
+    public void clearClipboard() {
+        clipboardShape = null;
     }
 
     public void pasteShape() {
@@ -312,4 +331,3 @@ public class SketchpadCanvas extends Canvas {
         }
     }
 }
-
