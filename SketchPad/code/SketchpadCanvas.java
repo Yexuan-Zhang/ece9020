@@ -4,13 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-// 画布面板，绘图主逻辑
 public class SketchpadCanvas extends Canvas {
 
     private DrawMode currentMode = DrawMode.LINE;
     private List<Shape> shapes = new ArrayList<>();
 
-    // 当前正在绘制中的状态
+    // Current state
     private int startX, startY, endX, endY;
     private List<Point> freehandPoints = new ArrayList<>();
     private List<Point> polygonPoints = new ArrayList<>();
@@ -33,7 +32,7 @@ public class SketchpadCanvas extends Canvas {
     public SketchpadCanvas() {
         setBackground(Color.WHITE);
 
-        // 鼠标按下
+        // Pressing the mouse
         addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 lastMouseX = e.getX();
@@ -129,7 +128,7 @@ public class SketchpadCanvas extends Canvas {
             }
         });
 
-        // 鼠标拖动
+        // Dragging the mouse
         addMouseMotionListener(new MouseMotionAdapter() {
             public void mouseDragged(MouseEvent e) {
                 endX = e.getX();
@@ -170,12 +169,12 @@ public class SketchpadCanvas extends Canvas {
     }
 
     public void paint(Graphics g) {
-        // 画所有已完成图形
+        // Draw all shapes
         for (Shape shape : shapes) {
             shape.draw(g);
         }
 
-        // 当前正在拖动中的图形（预览）
+        // Previewing dragged shape
         if (isDrawing) {
             g.setColor(Color.GRAY);
             switch (currentMode) {
@@ -202,7 +201,7 @@ public class SketchpadCanvas extends Canvas {
             }
         }
 
-        // 预览多边形点
+        // Previewing polygon shape
         if ((currentMode == DrawMode.POLYGON_OPEN || currentMode == DrawMode.POLYGON_CLOSED) && !polygonPoints.isEmpty()) {
             //g.setColor(Color.BLUE);
             for (int i = 0; i < polygonPoints.size() - 1; i++) {
