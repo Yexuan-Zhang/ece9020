@@ -56,7 +56,7 @@ class App:
             r, c = divmod(i, 4)
             r += 3 
             
-            # 确定按钮颜色
+          
             if t in OPS or t == '=':
                 bg, fg = '#4d90fe', 'white'
             elif t in ['M', 'MR', 'MC']:
@@ -122,7 +122,7 @@ class App:
                 self.e.delete(0, tk.END)
                 self.ready_for_new_input = False
                 self.just_calculated = False
-                if not self.last_operator:  # 如果没有待处理的运算符，清除高亮和历史
+                if not self.last_operator: 
                     self._clear_op_highlight()
                     self.update_history_display('')
             self.e.insert(tk.END, ch)
