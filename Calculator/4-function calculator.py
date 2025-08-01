@@ -67,7 +67,7 @@ class Calculator:
         self.ready_for_new_input = False
         self.just_calculated = False
         
-        # 括号相关状态
+        
         self.bracket_stack = []  
         self.current_expression = ""  
         self.in_bracket = False
